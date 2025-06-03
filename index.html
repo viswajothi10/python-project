@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AI Resume Scanner with Flask Backend</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 700px; margin: 2rem auto; padding: 1rem; background: #f0f4f8; }
+  h1 { text-align: center; color: #333; }
+  textarea { width: 100%; height: 120px; margin-bottom: 1rem; font-family: monospace; padding: 0.5rem; }
+  label { font-weight: bold; margin-top: 1rem; display: block; }
+  #result { margin-top: 1rem; padding: 1rem; background: #fff; border-radius: 6px; box-shadow: 0 0 5px #aaa; }
+  button { background-color: #0078d7; color: white; border: none; padding: 0.7rem 1.2rem; cursor: pointer; font-size: 1rem; border-radius: 5px; margin-top: 0.5rem; }
+  button:hover { background-color: #005fa3; }
+</style>
+</head>
+<body>
+
+<h1>AI-Powered Resume Scanner (Flask Backend)</h1>
+
+<label for="resumeText">Paste Resume Text:</label>
+<textarea id="resumeText" placeholder="Paste your resume text here..."></textarea>
+
+<label for="jobDescText">Paste Job Description:</label>
+<textarea id="jobDescText" placeholder="Paste the job description here..."></textarea>
+
+<button onclick="analyzeResume()">Analyze Resume</button>
+
+<div id="result"></div>
+
+<script>
+  async function analyzeResume() {
+    const resume = document.getElementById('resumeText').value;
+    const jobDesc = document.getElementById('jobDescText').value;
+
+    if (!resume || !jobDesc) {
+      alert('Please paste both resume and job description.');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://127.0.0.1:5000/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ resume: resume, job_description: jobDesc })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        const { match_score, matched_keywords } = data;
+
+        document.getElementById('result').innerHTML = `
+          <h2>Match Score: ${match_score}%</h2>
+          <p><strong>Matched Keywords:</strong> ${matched_keywords.join(', ') || 'None'}</p>
+        `;
+      } else {
+        alert(data.error || 'Error analyzing resume.');
+      }
+    } catch (err) {
+      alert('Failed to connect to server.');
+    }
+  }
+</script>
+
+</body>
+</html>
